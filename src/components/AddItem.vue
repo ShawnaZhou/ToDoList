@@ -1,11 +1,40 @@
+<template>
+	<div class="container">
+		<h1>Add Item</h1>
+		<el-icon color="lightgreen" :size="30">
+			<CirclePlusFilled />
+		</el-icon>
+		<el-row class="firstRow">
+			<h3>Choose time</h3>
+			<el-date-picker
+				v-model="time"
+				value-format="YYYY/MM/DD hh:mm:ss"
+				type="datetime"
+				placeholder="Select date and time"
+				:default-time="defaultTime"
+			>
+			</el-date-picker>
+		</el-row>
+		<el-row class="firstRow">
+			<h3>What need to do</h3>
+			<el-input v-model="input" placeholder="Type items you need to do" />
+		</el-row>
+		<el-row class="firstRow">
+			<button @click="send" class="btnConfirm">Confirm</button>
+		</el-row>
+	</div>
+</template>
+
 <script setup lang="ts">
 import { ref } from 'vue';
 import { ElMessage } from 'element-plus';
 import bus from 'vue3-eventbus';
+import { useStore } from 'vuex';
 import { CirclePlusFilled } from '@element-plus/icons-vue';
 
 const input = ref('');
 const time = ref('');
+const store = useStore();
 
 const messageShow = (content: string, msgType: any) => {
 	ElMessage({
@@ -31,31 +60,11 @@ const send = () => {
 	};
 	console.log(tempData);
 	bus.emit('addItem', tempData);
+	store.dispatch('setToDoList', tempData);
 	input.value = '';
 	time.value = '';
 };
 </script>
-
-<template>
-	<div class="container">
-		<h1>Add Item</h1>
-		<el-icon color="lightgreen" :size="30">
-			<CirclePlusFilled />
-		</el-icon>
-		<el-row class="firstRow">
-			<h3>Choose time</h3>
-			<el-date-picker v-model="time" value-format="YYYY/MM/DD hh:mm:ss" type="datetime" placeholder="Select date and time" :default-time="defaultTime">
-			</el-date-picker>
-		</el-row>
-		<el-row class="firstRow">
-			<h3>What need to do</h3>
-			<el-input v-model="input" placeholder="Type items you need to do" />
-		</el-row>
-		<el-row class="firstRow">
-			<button @click="send" class="btnConfirm">Confirm</button>
-		</el-row>
-	</div>
-</template>
 
 <style scoped>
 .container {

@@ -29,6 +29,7 @@
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue';
 import bus from 'vue3-eventbus';
+import { useStore } from 'vuex';
 import type { ElTable } from 'element-plus';
 import { CircleCheckFilled } from '@element-plus/icons-vue';
 
@@ -37,6 +38,7 @@ interface ToDo {
 	data: string;
 }
 
+const store = useStore();
 const multipleTableRef = ref<InstanceType<typeof ElTable>>();
 const multipleSelection = ref<ToDo[]>([]);
 const tableData = ref<ToDo[]>([]);
@@ -49,6 +51,7 @@ onMounted(() => {
 });
 
 bus.on('doneThings', (e: ToDo[]) => {
+	console.log(store.getters.getDoneList);
 	tableData.value = tableData.value.concat(e);
 	localStorage.setItem('doneList', JSON.stringify(tableData.value));
 });

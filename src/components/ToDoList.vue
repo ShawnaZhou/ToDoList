@@ -32,15 +32,18 @@ import { ref, onMounted } from 'vue';
 import { CircleCheck } from '@element-plus/icons-vue';
 import type { ElTable } from 'element-plus';
 import bus from 'vue3-eventbus';
+import { useStore} from 'vuex';
 
 interface ToDo {
 	time: string;
 	data: string;
 }
 
+const store = useStore();
 const multipleTableRef = ref<InstanceType<typeof ElTable>>();
 const multipleSelection = ref<ToDo[]>([]);
 const tableData = ref<ToDo[]>([]);
+
 onMounted(() => {
 	let tempData = localStorage.getItem('toDoList');
 	if (tempData) {
@@ -49,6 +52,7 @@ onMounted(() => {
 });
 
 bus.on('addItem', (e: ToDo) => {
+	console.log(store.getters.getToDoList,store.state.toDoList);
 	tableData.value.push(e);
 	localStorage.setItem('toDoList', JSON.stringify(tableData.value));
 });
