@@ -11,7 +11,7 @@
 			row-key="time"
 			key="time"
 			stripe
-			:data="tableData"
+			:data="toDoList"
 			:default-sort="{ prop: 'time', order: 'ascending' }"
 			style="width: 100%"
 			@selection-change="handleSelectionChange"
@@ -31,52 +31,51 @@
 import { ref, onMounted } from 'vue';
 import { CircleCheck } from '@element-plus/icons-vue';
 import type { ElTable } from 'element-plus';
-import bus from 'vue3-eventbus';
-import { useStore} from 'vuex';
+import { storeToRefs } from 'pinia';
+import { useStore } from '../store/store';
 
 interface ToDo {
+	/** 时间 */
 	time: string;
+	/** 需完成的目标 */
 	data: string;
 }
 
 const store = useStore();
+const { toDoList } = storeToRefs(store);
 const multipleTableRef = ref<InstanceType<typeof ElTable>>();
 const multipleSelection = ref<ToDo[]>([]);
-const tableData = ref<ToDo[]>([]);
 
 onMounted(() => {
-	let tempData = localStorage.getItem('toDoList');
+	let tempData = localStorage.getItem('localStateLongTimeStorage');
 	if (tempData) {
-		tableData.value = tableData.value.concat(JSON.parse(tempData));
+		let tempData2 = JSON.parse(tempData);
+		if (tempData2.toDoList.length > 0) {
+			console.log('alive');
+			store.setToDoList(tempData2.toDoList);
+		}
 	}
 });
 
-bus.on('addItem', (e: ToDo) => {
-	console.log(store.getters.getToDoList,store.state.toDoList);
-	tableData.value.push(e);
-	localStorage.setItem('toDoList', JSON.stringify(tableData.value));
-});
-
+/** 选中行改变触发事件 */
 const handleSelectionChange = (val: ToDo[]) => {
 	multipleSelection.value = val;
 };
 
-const deleteRow = (index: number) => {
-	tableData.value.splice(index, 1);
-	localStorage.setItem('toDoList', JSON.stringify(tableData.value));
-};
-
+/** 完成表格中的事项 */
 const doneThings = () => {
-	bus.emit('doneThings', multipleSelection.value);
-	multipleSelection.value.forEach((item, index) => {
-		let tempIndex = tableData.value.indexOf(item);
-		deleteRow(tempIndex);
+	store.addDoneList(multipleSelection.value);
+	multipleSelection.value.forEach((item) => {
+		let tempIndex = toDoList.value.indexOf(item);
+		store.removeToDoItem(tempIndex);
 	});
 };
+
+/** 删除表格中的事项 */
 const deleteThings = () => {
-	multipleSelection.value.forEach((item, index) => {
-		let tempIndex = tableData.value.indexOf(item);
-		deleteRow(tempIndex);
+	multipleSelection.value.forEach((item) => {
+		let tempIndex = toDoList.value.indexOf(item);
+		store.removeToDoItem(tempIndex);
 	});
 };
 </script>

@@ -1,41 +1,39 @@
-import { createStore } from 'vuex';
-
-interface State {
-	toDoList: any[];
-	doneList: any[];
+import { defineStore } from 'pinia';
+interface Item {
+	time: string;
+	data: string;
 }
-
-const store = createStore({
-	state() {
+export const useStore = defineStore('storeId', {
+	state: () => {
 		return {
-			toDoList: [],
-			doneList: [],
+			toDoList: new Array(),
+			doneList: new Array(),
 		};
 	},
-	getters: {
-		getToDoList(state: State) {
-			return state.toDoList;
-		},
-		getDoneList(state: State) {
-			return state.doneList;
-		},
-	},
 	actions: {
-		setToDoList({ commit }, payload) {
-			commit('addToDo', payload);
+		/** toDoList增加一件事项 */
+		addToDoItem(data: Item) {
+			this.$state.toDoList.push(data);
 		},
-		setDoneList({ commit }, payload) {
-			commit('addDone', payload);
+		/** doneList增加事项，可多个添加 */
+		addDoneList(data: Item[]) {
+			this.$state.doneList = this.$state.doneList.concat(data);
 		},
-	},
-	mutations: {
-		addToDo(state: any, payload: any) {
-			state.toDoList = payload;
+		/** 重新设置toDoList */
+		setToDoList(data: Item[]) {
+			this.$state.toDoList = data;
 		},
-		addDone(state: any, payload: any) {
-			state.doneList = payload;
+		/** 重新设置doneList */
+		setDoneList(data: Item[]) {
+			this.$state.doneList = data;
+		},
+		/** 移除toDoList中的某项 */
+		removeToDoItem(index: number) {
+			this.$state.toDoList.splice(index, 1);
+		},
+		/** 移除doneList中的某项 */
+		removeDoneItem(index: number) {
+			this.$state.doneList.splice(index, 1);
 		},
 	},
 });
-
-export default store;

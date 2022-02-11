@@ -11,7 +11,7 @@
 			row-key="time"
 			key="time"
 			stripe
-			:data="tableData"
+			:data="doneList"
 			:default-sort="{ prop: 'time', order: 'ascending' }"
 			style="width: 100%"
 			@selection-change="handleSelectionChange"
@@ -28,47 +28,44 @@
 
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue';
-import bus from 'vue3-eventbus';
-import { useStore } from 'vuex';
+import { useStore } from '../store/store';
+import { storeToRefs } from 'pinia';
 import type { ElTable } from 'element-plus';
 import { CircleCheckFilled } from '@element-plus/icons-vue';
 
 interface ToDo {
+	/** 目标时间 */
 	time: string;
+	/** 目标事项 */
 	data: string;
 }
 
 const store = useStore();
+const { doneList } = storeToRefs(store);
 const multipleTableRef = ref<InstanceType<typeof ElTable>>();
 const multipleSelection = ref<ToDo[]>([]);
-const tableData = ref<ToDo[]>([]);
 
 onMounted(() => {
-	let tempData = localStorage.getItem('toDoList');
+	let tempData = localStorage.getItem('localStateLongTimeStorage');
 	if (tempData) {
-		tableData.value = tableData.value.concat(JSON.parse(tempData));
+		let tempData2 = JSON.parse(tempData);
+		if (tempData2.doneList.length > 0) {
+			console.log('doneList: ' + tempData2.doneList);
+			store.setDoneList(tempData2.doneList);
+		}
 	}
 });
 
-bus.on('doneThings', (e: ToDo[]) => {
-	console.log(store.getters.getDoneList);
-	tableData.value = tableData.value.concat(e);
-	localStorage.setItem('doneList', JSON.stringify(tableData.value));
-});
-
+/** 表格选中项改变触发事件 */
 const handleSelectionChange = (val: ToDo[]) => {
 	multipleSelection.value = val;
 };
 
-const deleteRow = (index: number) => {
-	tableData.value.splice(index, 1);
-	localStorage.setItem('doneList', JSON.stringify(tableData.value));
-};
-
+/** 删除表格中事项 */
 const deleteThings = () => {
-	multipleSelection.value.forEach((item, index) => {
-		let tempIndex = tableData.value.indexOf(item);
-		deleteRow(tempIndex);
+	multipleSelection.value.forEach((item) => {
+		let tempIndex = doneList.value.indexOf(item);
+		store.removeDoneItem(tempIndex);
 	});
 };
 </script>

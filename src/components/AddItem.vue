@@ -28,9 +28,13 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { ElMessage } from 'element-plus';
-import bus from 'vue3-eventbus';
-import { useStore } from 'vuex';
+import { useStore } from '../store/store';
 import { CirclePlusFilled } from '@element-plus/icons-vue';
+
+interface ToDo {
+	time: string;
+	data: string;
+}
 
 const input = ref('');
 const time = ref('');
@@ -53,16 +57,15 @@ const send = () => {
 		messageShow("oops you haven't choose any time yet", 'error');
 		return;
 	}
-	messageShow('Add success', 'success');
-	let tempData = {
+	let tempData: ToDo = {
 		time: time.value,
 		data: input.value,
 	};
 	console.log(tempData);
-	bus.emit('addItem', tempData);
-	store.dispatch('setToDoList', tempData);
+	store.addToDoItem(tempData);
 	input.value = '';
 	time.value = '';
+	messageShow('Add success', 'success');
 };
 </script>
 
